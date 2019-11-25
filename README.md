@@ -1,8 +1,9 @@
 # CS576Final
 
-# Frontend  (Zequn)
-  ## Communication with backend
-  ## Controls/Features
+# Frontend
+  ### Views using Web
+  ### Communication with backend
+  ### Controls/Features
 # Backend
 ### Pipeline
 * Video query
@@ -19,9 +20,10 @@ All feature extractions should be done within 5 seconds. The features need to be
   #### Audio
   #### Object Detection
 ### TODO
-- [ ] Comunication with frontend (Zequn)
-- [ ] Comparing Strategy (Jiarong)
-- [ ] Color (Zequn)
+- [ ] Web (Zequn)
+- [ ] Backend ComunicationPart (Zequn)
+- [ ] Comparing Strategy
+- [ ] Color 
 - [ ] Frame Feature (Jiarong) 
 - [ ] Multi-frame Feature (Jiarong)
 - [ ] Frame Motion Feature (Jiarong)
