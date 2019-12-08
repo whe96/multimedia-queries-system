@@ -16,6 +16,21 @@ All feature extractions and comparison should be done within 5 seconds. The feat
 PyTorch Prefered
 #### Color 
 [Color Histogram](https://www.geeksforgeeks.org/opencv-python-program-analyze-image-using-histogram/)
+
+Test on all 001.rgb images
+
+|  | flower| interview| movie| music| sports|starcraft|traffic|
+|:-----:|:-----:| :-------:| :----:| :-----:| :-----:| :-----:| :-----:| 
+|flower| 1| 0.534|0.299|0.297|0.622|0.296|0.820|
+|interview| |1.0| 0.001| 0.000|0.76|0.000|0.306
+|movie| | |1.0|0.999 |0.126|0.999|0.741|
+|music| | | |1.0|0.112|0.999|0.741|
+|sports| | | | | 1.0 |0.112|0.298|
+|starcraft| | | | | |1.0|0.741|
+|traffic| | | | | | |1.0|
+
+
+
 #### Frame Feature
 ResNet 18
 #### Multi-frame Feature 
