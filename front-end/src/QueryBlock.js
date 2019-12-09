@@ -14,6 +14,7 @@ class QueryBlock extends React.Component {
         this.dropdownOnClick = this.dropdownOnClick.bind(this);
         this.updateCurrentQuery = this.updateCurrentQuery.bind(this);
         this.updateRatio = this.updateRatio.bind(this);
+        this.queryButtonOnClick = this.queryButtonOnClick.bind(this);
     }
 
     dropdownOnClick() {
@@ -30,6 +31,10 @@ class QueryBlock extends React.Component {
 
     updateRatio(event) {
         this.props.onRatiosChange(event);
+    }
+
+    queryButtonOnClick() {
+        this.props.onRequestData();
     }
 
     render() {
@@ -92,7 +97,9 @@ class QueryBlock extends React.Component {
                         <input className="ratio-bar" type="range" name="xxx" min="0" max="5" step="1"
                                value={this.props.ratios[3]} onChange={this.updateRatio} />
                     </label>
-                    <button className="button is-light query-button">Query</button>
+                    <button className="button is-link query-button"
+                            onClick={this.queryButtonOnClick}>Query
+                    </button>
                 </div>
             </div>
         );
@@ -104,7 +111,8 @@ QueryBlock.propTypes = {
     currentQuery: PropTypes.string,
     ratios: PropTypes.array,
     onQueryChange: PropTypes.func,
-    onRatiosChange: PropTypes.func
+    onRatiosChange: PropTypes.func,
+    onRequestData: PropTypes.func
 };
 
 export default QueryBlock;

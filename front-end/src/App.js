@@ -10,13 +10,16 @@ class App extends React.Component {
         super(props);
 
         this.state = {
+            index: 0,
             currentQuery: '',
             ratios: ['1', '1', '1', '1'],
+            resultData: null
         };
         this.folders = [];
 
         this.handleQueryChange = this.handleQueryChange.bind(this);
         this.handleRatiosChange = this.handleRatiosChange.bind(this);
+        this.requestData = this.requestData.bind(this);
 
         this.getQueriesFolder();
     }
@@ -32,6 +35,7 @@ class App extends React.Component {
 
     handleQueryChange(event) {
         this.setState({
+            index: 0,
             currentQuery: event.target.id
         });
     }
@@ -53,15 +57,38 @@ class App extends React.Component {
         this.setState({ratios: newRatios});
     }
 
+    async requestData() {
+        let url = "http://localhost:5000/results/" + this.state.currentQuery
+            + "/" + this.state.ratios[0] + "/" + this.state.ratios[1]
+            + "/" + this.state.ratios[2] + "/" + this.state.ratios[3];
+
+        const response = await fetch(url);
+        const resultData = await response.json();
+        this.setState({
+            index: this.state.index + 1,
+            resultData: resultData
+        });
+    }
+
     render() {
+        let resultBlock = (this.state.index > 0) ? (
+            <div>
+                <h3>Result</h3>
+                <hr />
+                <ResultBlock key={this.state.index} resultData={this.state.resultData}/>
+            </div>) : null;
+
         return (
             <div className="App">
-                <QueryBlock folders={this.folders}
-                            currentQuery={this.state.currentQuery}
-                            ratios={this.state.ratios}
-                    onQueryChange={this.handleQueryChange} onRatiosChange={this.handleRatiosChange}
+                <QueryBlock
+                    folders={this.folders}
+                    currentQuery={this.state.currentQuery}
+                    ratios={this.state.ratios}
+                    onQueryChange={this.handleQueryChange}
+                    onRatiosChange={this.handleRatiosChange}
+                    onRequestData={this.requestData}
                 />
-                <ResultBlock />
+                {resultBlock}
             </div>
         );
     }
