@@ -115,3 +115,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+front-end/node_modules/
+flask-server/queries/
+flask-server/static/

@@ -1,0 +1,60 @@
+.result-block {
+    display: flex;
+    height: 600px;
+}
+
+.result-block-left {
+    flex: 3;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.dropdown {
+    width: 480px;
+}
+
+.dropdown-trigger {
+    background-color: lightcyan;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-trigger-button {
+    width: 100%;
+}
+
+.dropdown-menu {
+    width: 100%;
+}
+
+.result-block-right {
+    flex: 2;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    top: 50px;
+    left: -50px;
+}
+
+.result-block-chart {
+    display: flex;
+    width: 480px;
+    min-height: 360px;
+}
+
+.result-block-canvas {
+    width: 480px;
+    min-height: 360px;
+}
+
+.progress-bar {
+    width: 450px;
+    height: 3px;
+    position: relative;
+    left: 20px;
+}
