@@ -4,17 +4,18 @@ import os
 import glob
 import collections
 from scipy import spatial
-from utils import read_image, timeit
+from utils import read_image_folder, timeit
 from test import simulate_similarity
 
 
 class Color:
 
-    def __init__(self, dir, feature_dir, width, height, color_space='RGB', bins=32):
+    def __init__(self, dir, feature_dir, width, height, color_space='RGB', bins=32,mode="average"):
         self.dir = dir
         self.feature_dir = feature_dir
         self.color_space = color_space
         self.bins = bins
+        self.mode = mode
         self.width = width
         self.height = height
         self.features = {}
@@ -25,7 +26,7 @@ class Color:
             self.weights = [2, 1, 1]
 
     @timeit
-    def search(self, imgs, fps=10):
+    def color_search(self, imgs, fps=10):
         span = int(30 / fps)
         feature = self.extract_features(imgs)
         l = feature.shape[0]
@@ -33,26 +34,42 @@ class Color:
         for name in sorted(self.features):
             feature2 = self.features[name]
             idx = 0
-            while idx+l < feature2.shape[0]:
+            while idx + l < feature2.shape[0]:
                 similarity = self.compare(feature, feature2[idx:idx + l])
                 res[name].append(similarity)
                 idx += span
         return res
 
     def compare(self, features1, features2):
-        if not features1.shape == features2.shape:
-            raise ValueError("Feature shape not match {} vs {}".format(features1.shape, features2.shape))
-        res = []
-        for t in range(features1.shape[0]):
-            tmp = 1-spatial.distance.cdist(features1[t],features2[t],metric='cosine')
-            similarity = sum([x * y / sum(self.weights) for x, y in zip([tmp[0][0],tmp[1][1],tmp[2][2]], self.weights)])
-            res.append(similarity)
-        return sum(res)/len(res)
-
+        mode = self.mode
+        if mode == "exact":
+            l = min(features1.shape[0], features2.shape[0])
+            res = []
+            for t in range(l):
+                tmp = 1 - spatial.distance.cdist(features1[t], features2[t], metric='cosine')
+                similarity = sum([x * y / sum(self.weights) for x, y in zip([tmp[0][0], tmp[1][1], tmp[2][2]], self.weights)])
+                res.append(similarity)
+            return sum(res) / len(res)
+        elif mode == "average":
+            feature1 = np.average(features1, axis=0)
+            feature2 = np.average(features2, axis=0)
+            res = []
+            for c in range(feature1.shape[0]):
+                res.append(1 - spatial.distance.cosine(feature1[c], feature2[c]))
+            return sum([x * y for x, y in zip(res, self.weights)]) / sum(self.weights)
+        else:
+            raise ValueError("Unknown mode {}".format(mode))
 
     def extract_features(self, imgs):
         res = []
         for img in imgs:
+            if self.color_space == "RGB":
+                pass
+            elif self.color_space == "YCrCb":
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2YCR_CB)
+            else:
+                raise ValueError("Unknown {}".format(self.color_space))
+
             channel1 = cv2.calcHist([img], [0], None, [self.bins], [0, 256]).flatten()
             channel2 = cv2.calcHist([img], [1], None, [self.bins], [0, 256]).flatten()
             channel3 = cv2.calcHist([img], [2], None, [self.bins], [0, 256]).flatten()
@@ -60,19 +77,6 @@ class Color:
             res.append(hist)
         res = np.array(res)
         return res
-
-    """
-        Output is 3 x bins
-    """
-
-    # @timeit
-    def cal_color_histogram(self, img_path):
-        img = read_image(img_path, self.width, self.height)
-        channel1 = cv2.calcHist([img], [0], None, [self.bins], [0, 256]).flatten()
-        channel2 = cv2.calcHist([img], [1], None, [self.bins], [0, 256]).flatten()
-        channel3 = cv2.calcHist([img], [2], None, [self.bins], [0, 256]).flatten()
-        hist = np.vstack([channel1, channel2, channel3])
-        return hist
 
     def load(self):
         features = glob.glob(os.path.join(self.feature_dir, '*'))
@@ -87,20 +91,10 @@ class Color:
         for video in videos:
             name = os.path.basename(video)
             output_filename = os.path.join(self.feature_dir, name)
-            res = []
-            for i in range(1, 600 + 1):
-                img_path = self.get_img_path(name, i)
-                hist = self.cal_color_histogram(img_path)
-                res.append(hist)
-            res = np.array(res)
-            print(name, res.shape)
-            np.save(output_filename, res)
-
-    def validate(self, num_ites=10):
-        simulate_similarity(self.compare, num_ites)
-
-    def get_img_path(self, name, idx):
-        return os.path.join(self.dir, name, "{}{:03d}.rgb".format(name, idx))
+            imgs = read_image_folder(video, extension="rgb")
+            features = self.extract_features(imgs)
+            print(name, features.shape)
+            np.save(output_filename, features)
 
     def second_to_frame(self, second, start_idx=1, max_idx=600, fps=30):
         frame_idx = int(second * fps) + start_idx
@@ -108,30 +102,26 @@ class Color:
             frame_idx -= 1
         return frame_idx
 
-    @timeit
-    def get_avg_histogram(self, video, start, query_duration=5):
-        start_idx = self.second_to_frame(start)
-        end_idx = self.second_to_frame(start + query_duration)
-        hists = self.features[video][start_idx:end_idx]
-        hists = np.average(hists, axis=0)
-        return hists
+    def random_compare(self, video1, start1, video2, start2):
+        start_idx1 = self.second_to_frame(start1)
+        end_idx1 = self.second_to_frame(start1 + 5)
+        features1 = self.features[video1][start_idx1:end_idx1]
 
-    # def compare(self,video1,start1,video2,start2):
-    #     feature1 = self.get_avg_histogram(video1,start1)
-    #     feature2 = self.get_avg_histogram(video2,start2)
-    #     res = []
-    #     for i in range(feature1.shape[0]):
-    #         res.append(1 - spatial.distance.cosine(feature1[i], feature2[i]))
-    #     similarity = sum([x*y/sum(self.weights) for x,y in zip(res,self.weights)])
-    #     return similarity
+        start_idx2 = self.second_to_frame(start2)
+        end_idx2 = self.second_to_frame(start2 + 5)
+        features2 = self.features[video2][start_idx2:end_idx2]
+
+        similarity = self.compare(features1, features2,mode="average")
+        return similarity
+
+    def random_validation(self, num_iters):
+        return simulate_similarity(self.random_compare, num_iters=num_iters)
 
 
 if __name__ == '__main__':
     dir = "data/dataset"
     outdir = "feature/color"
-    color = Color(dir, outdir, 352, 288)
-    # color.preprocess()
+    color = Color(dir, outdir, 352, 288, color_space="YCrCb", bins=32)
+    color.preprocess()
     color.load()
-    # for i in [10,50,100,500,1000,2000,5000,10000]:
-    #     color.validate(i)
-    color.validate(1000)
+    color.random_validation(100)
