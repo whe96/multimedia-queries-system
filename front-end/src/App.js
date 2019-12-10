@@ -4,6 +4,7 @@ import './App.css';
 
 import QueryBlock from "./QueryBlock";
 import ResultBlock from "./ResultBlock";
+import Loading from "./Loading";
 
 class App extends React.Component {
     constructor(props) {
@@ -13,7 +14,8 @@ class App extends React.Component {
             index: 0,
             currentQuery: '',
             ratios: ['1', '1', '1', '1'],
-            resultData: null
+            resultData: null,
+            loading: false
         };
         this.folders = [];
 
@@ -57,16 +59,25 @@ class App extends React.Component {
         this.setState({ratios: newRatios});
     }
 
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async requestData() {
+        this.setState({loading: true});
+
         let url = "http://localhost:5000/results/" + this.state.currentQuery
             + "/" + this.state.ratios[0] + "/" + this.state.ratios[1]
             + "/" + this.state.ratios[2] + "/" + this.state.ratios[3];
+
+        await this.sleep(2000);
 
         const response = await fetch(url);
         const resultData = await response.json();
         this.setState({
             index: this.state.index + 1,
-            resultData: resultData
+            resultData: resultData,
+            loading: false
         });
     }
 
@@ -77,6 +88,15 @@ class App extends React.Component {
                 <hr />
                 <ResultBlock key={this.state.index} resultData={this.state.resultData}/>
             </div>) : null;
+
+        let modal = (
+            <div className={"modal" + ((this.state.loading) ? " is-active": "")}>
+                <div className="modal-background"/>
+                <div className="modal-content">
+                    <Loading />
+                    <h3 className="modal-text">Fetching data...</h3>
+                </div>
+            </div>);
 
         return (
             <div className="App">
@@ -89,6 +109,7 @@ class App extends React.Component {
                     onRequestData={this.requestData}
                 />
                 {resultBlock}
+                {modal}
             </div>
         );
     }

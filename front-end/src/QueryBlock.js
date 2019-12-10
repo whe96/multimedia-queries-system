@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from 'prop-types';
 
+import Loading from "./Loading";
+
 import './QueryBlock.css'
 
 class QueryBlock extends React.Component {
@@ -101,6 +103,7 @@ class QueryBlock extends React.Component {
                             onClick={this.queryButtonOnClick}>Query
                     </button>
                 </div>
+                <Loading />
             </div>
         );
     }
