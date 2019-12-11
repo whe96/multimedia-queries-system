@@ -95,8 +95,8 @@ class QueryBlock extends React.Component {
                                value={this.props.ratios[2]} onChange={this.updateRatio} />
                     </label>
                     <label className="ratio-item">
-                        <span className="ratio-label">XXX ({this.props.ratios[3]})</span>
-                        <input className="ratio-bar" type="range" name="xxx" min="0" max="5" step="1"
+                        <span className="ratio-label">Semantic ({this.props.ratios[3]})</span>
+                        <input className="ratio-bar" type="range" name="semantic" min="0" max="5" step="1"
                                value={this.props.ratios[3]} onChange={this.updateRatio} />
                     </label>
                     <button className="button is-link query-button"

@@ -59,18 +59,12 @@ class App extends React.Component {
         this.setState({ratios: newRatios});
     }
 
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     async requestData() {
         this.setState({loading: true});
 
         let url = "http://localhost:5000/results/" + this.state.currentQuery
             + "/" + this.state.ratios[0] + "/" + this.state.ratios[1]
             + "/" + this.state.ratios[2] + "/" + this.state.ratios[3];
-
-        await this.sleep(2000);
 
         const response = await fetch(url);
         const resultData = await response.json();

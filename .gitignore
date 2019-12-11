@@ -119,3 +119,4 @@ venv.bak/
 front-end/node_modules/
 flask-server/queries/
 flask-server/static/
+flask-server/feature/
