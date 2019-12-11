@@ -16,6 +16,7 @@ class ResultBlock extends React.Component {
 
         this.dropdownOnClick = this.dropdownOnClick.bind(this);
         this.updateCurrentResult = this.updateCurrentResult.bind(this);
+        this.trackVideo = this.trackVideo.bind(this);
     }
 
     componentDidMount() {
@@ -31,6 +32,13 @@ class ResultBlock extends React.Component {
 
     componentWillUnmount() {
         clearInterval(this.interval);
+    }
+
+    trackVideo(event) {
+        let point = this.areaChart.getElementAtEvent(event)[0];
+        if (point) {
+            this.resultVideo.currentTime = point['_index'] * 0.1;
+        }
     }
 
     drawAreaChart() {
@@ -56,9 +64,15 @@ class ResultBlock extends React.Component {
                         display: false
                     }]
                 },
+                elements: {
+                    point:{
+                        radius: 0
+                    }
+                },
                 legend: {
                     onClick: (e) => e.stopPropagation()
-                }
+                },
+                onClick: this.trackVideo
             },
         });
     }
