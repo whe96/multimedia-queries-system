@@ -111,7 +111,7 @@ class Color:
         end_idx2 = self.second_to_frame(start2 + 5)
         features2 = self.features[video2][start_idx2:end_idx2]
 
-        similarity = self.compare(features1, features2,mode="average")
+        similarity = self.compare(features1, features2)
         return similarity
 
     def random_validation(self, num_iters):
