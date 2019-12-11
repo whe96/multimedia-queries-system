@@ -1,32 +1,23 @@
 import cv2
+import math
 import numpy as np
 import os
 import glob
 import collections
 from scipy import spatial
-from utils import read_image_folder, timeit
+from utils import read_image, read_image_folder, timeit
 from test import simulate_similarity
 
+class Motion:
 
-class Color:
-
-    def __init__(self, dir, feature_dir, width, height, color_space='RGB', bins=32,mode="average"):
-        self.dir = dir
-        self.feature_dir = feature_dir
-        self.color_space = color_space
-        self.bins = bins
-        self.mode = mode
-        self.width = width
-        self.height = height
+    def __init__(self, mode="average"):
         self.features = {}
+        self.mode = mode
+        self.weights = [1, 1, 1]
 
-        if color_space == 'RGB':
-            self.weights = [1, 1, 1]
-        elif color_space == 'YCrCb':
-            self.weights = [2, 1, 1]
 
     @timeit
-    def color_search(self, imgs, fps=10):
+    def search(self, imgs, fps=10):
         span = int(30 / fps)
         feature = self.extract_features(imgs)
         l = feature.shape[0]
@@ -34,11 +25,11 @@ class Color:
         for name in sorted(self.features):
             feature2 = self.features[name]
             idx = 0
-            while idx + l < feature2.shape[0]:
+            while idx+l < feature2.shape[0]:
                 similarity = self.compare(feature, feature2[idx:idx + l])
                 res[name].append(similarity)
                 idx += span
-        return res
+        return
 
     def compare(self, features1, features2):
         mode = self.mode
@@ -60,41 +51,60 @@ class Color:
         else:
             raise ValueError("Unknown mode {}".format(mode))
 
-    def extract_features(self, imgs):
-        res = []
-        for img in imgs:
-            if self.color_space == "RGB":
-                pass
-            elif self.color_space == "YCrCb":
-                img = cv2.cvtColor(img, cv2.COLOR_RGB2YCR_CB)
-            else:
-                raise ValueError("Unknown {}".format(self.color_space))
 
-            channel1 = cv2.calcHist([img], [0], None, [self.bins], [0, 256]).flatten()
-            channel2 = cv2.calcHist([img], [1], None, [self.bins], [0, 256]).flatten()
-            channel3 = cv2.calcHist([img], [2], None, [self.bins], [0, 256]).flatten()
-            hist = np.vstack([channel1, channel2, channel3])
-            res.append(hist)
+
+    def extract_features(self, imgs):
+        mode = "imgFlow"
+
+        res = []
+        if (mode == "imgFlow"):
+            tmpImg = cv2.resize(imgs[0], dsize=(64, 80))
+            prvs  = cv2.cvtColor(tmpImg, cv2.COLOR_BGR2GRAY)
+        else:
+            prvs = cv2.cvtColor(imgs[0], cv2.COLOR_BGR2GRAY)
+
+        counter = 0
+
+        for img in imgs:
+            if (counter < 1):
+                counter+=1
+                continue
+            if (mode == "imgFlow"):
+                imgResize = cv2.resize(img, dsize=(64, 80))
+                next = cv2.cvtColor(imgResize, cv2.COLOR_BGR2GRAY)
+                flowNext = cv2.calcOpticalFlowFarneback(prvs, next, None, 0.5, 16, 15, 3, 5, 1.2, 0)
+
+                xNext = flowNext[..., 0]
+                yNext = flowNext[..., 1]
+
+                XYDimen = np.vstack([xNext.flatten(), yNext.flatten()])
+                res.append(XYDimen)
+                prvs = next
+                counter += 1
+
         res = np.array(res)
+        print(res)
         return res
 
-    def load(self):
-        features = glob.glob(os.path.join(self.feature_dir, '*'))
-        for feature in features:
-            name = os.path.basename(feature).split('.')[0]
-            npy = np.load(feature)
-            self.features[name] = npy
-        print("Finish loading color features from {}".format(features))
 
     def preprocess(self):
-        videos = glob.glob(os.path.join(self.dir, '*'))
+        videos = glob.glob(os.path.join('video database', '*'))
+        # videos = 'video database'
         for video in videos:
             name = os.path.basename(video)
-            output_filename = os.path.join(self.feature_dir, name)
+            output_filename = os.path.join('feature_dir', name)
             imgs = read_image_folder(video, extension="rgb")
             features = self.extract_features(imgs)
             print(name, features.shape)
             np.save(output_filename, features)
+
+    def load(self):
+        features = glob.glob(os.path.join('feature_dir', '*'))
+        for feature in features:
+            name = os.path.basename(feature).split('.')[0]
+            npy = np.load(feature)
+            self.features[name] = npy
+        print("Finish loading motion features from {}".format(features))
 
     def second_to_frame(self, second, start_idx=1, max_idx=600, fps=30):
         frame_idx = int(second * fps) + start_idx
@@ -117,11 +127,12 @@ class Color:
     def random_validation(self, num_iters):
         return simulate_similarity(self.random_compare, num_iters=num_iters)
 
-
 if __name__ == '__main__':
-    dir = "data/dataset"
-    outdir = "feature/color"
-    color = Color(dir, outdir, 352, 288, color_space="YCrCb", bins=32)
-    color.preprocess()
-    color.load()
-    color.random_validation(100)
+    optical = Motion()
+    video = 'video database/interview'
+
+    optical.load()
+
+    # optical.preprocess()
+    # color.load()
+    optical.random_validation(1000)
