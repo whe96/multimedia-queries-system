@@ -1,8 +1,12 @@
 # CS576Final
 
 # Frontend
+* Interface using React and create-react-app
 
 # Backend
+* Server hosted by Python Flask
+
+# Algorithm
 ### Pipeline
 * Video query
 * Multi-threads response to extract different features and compare
