@@ -12,7 +12,8 @@ dirr = "data/dataset"
 color_dir = "feature/color"
 semantic_dir = "feature/resnet_resize"
 audio_dir = "feature/mfcc"
-engine = VideoSearchEngine(dirr, color_dir, semantic_dir, audio_dir)
+motion_dir = "feature/optical_flow"
+engine = VideoSearchEngine(dirr, color_dir, semantic_dir, audio_dir, motion_dir)
 
 
 @app.route('/')
@@ -22,7 +23,7 @@ def hello_world():
 
 @app.route('/queries')
 def get_queries():
-    q = '../data/query'
+    q = './queries'
     f = filter(lambda x: os.path.isdir(os.path.join(q, x)), os.listdir(q))
     folders = sorted([str(folder) for folder in f])
     for folder in folders:
