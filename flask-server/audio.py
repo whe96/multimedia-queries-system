@@ -27,7 +27,7 @@ class Audio:
         res = collections.defaultdict(list)
         for name in sorted(self.features.keys()):
             t = 0
-            while t + 5 < 20:
+            while t< 20:
                 idx = self.second_to_idx(t)
                 end_idx = self.second_to_idx(t + 5)
                 simi = self.compare(feature, self.features[name][idx:end_idx])
@@ -36,7 +36,6 @@ class Audio:
         return res
 
     def compare(self, feature1, feature2):
-        mode = self.mode
         if self.mode == "exact":
             _min = min(feature1.shape[0], feature2.shape[0])
             feature1 = feature1[:_min]
@@ -44,18 +43,18 @@ class Audio:
             res = []
             t = 0
             while t < _min:
-                simi = 1 - spatial.distance.cosine(feature1[t], feature2[t])
+                simi = (2 - spatial.distance.cosine(feature1[t], feature2[t]))/2
                 res.append(simi)
                 t += self.offset
             return sum(res) / len(res)
         elif self.mode == "average":
             feature1 = np.average(feature1, axis=0)
             feature2 = np.average(feature2, axis=0)
-            return 1 - spatial.distance.cosine(feature1, feature2)
+            return (2 - spatial.distance.cosine(feature1, feature2))/2
         elif self.mode == "max":
             feature1 = np.amax(feature1, axis=0)
             feature2 = np.amax(feature2, axis=0)
-            return 1 - spatial.distance.cosine(feature1, feature2)
+            return (2 - spatial.distance.cosine(feature1, feature2))/2
         else:
             raise ValueError("Unknown mode {}".format(self.mode))
 
@@ -105,9 +104,9 @@ class Audio:
 
 
 if __name__ == '__main__':
-    dir = "data/dataset"
+    dir = "../data/dataset"
     feature_dir = "feature/mfcc"
     audio = Audio(dir, feature_dir, mode="max")
     # audio.preprocess()
     audio.load()
-    audio.random_validation(100)
+    audio.random_validation(500)

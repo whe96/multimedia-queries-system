@@ -44,7 +44,7 @@ class ResNet:
         res = collections.defaultdict(list)
         for name in sorted(self.features.keys()):
             t = 0
-            while t + 5 < 20:
+            while t < 20:
                 idx = self.second_to_frame(t)
                 end_idx = self.second_to_frame(t + 5)
                 features2 = self.features[name][idx:end_idx]
@@ -59,12 +59,12 @@ class ResNet:
             _min = min(features1.shape[0], features2.shape[0])
             res = []
             for i in range(_min):
-                res.append(1 - spatial.distance.cosine(features1[i], features2[i]))
+                res.append((2 - spatial.distance.cosine(features1[i], features2[i]))/2)
             return sum(res) / len(res)
         elif self.mode == "average":
             feature1 = np.average(features1,axis=0)
             feature2 = np.average(features2,axis=0)
-            return 1 - spatial.distance.cosine(feature1, feature2)
+            return (2 - spatial.distance.cosine(feature1, feature2))/2
 
     def random_compare(self, video1, start1, video2, start2):
         start_idx1 = self.second_to_frame(start1)

@@ -1,9 +1,7 @@
 # CS576Final
 
 # Frontend
-  ### Views using Web
-  ### Communication with backend
-  ### Controls/Features
+
 # Backend
 ### Pipeline
 * Video query
@@ -14,7 +12,7 @@
 All feature extractions and comparison should be done within 5 seconds. The features need to be tested separately to verify its accuracy (from human eyes). The dimensions of features shall be discussed later. Please write sample codes to setup and extract features and compare.
 ### Environment
 * PyTorch
-* Python3
+* Python3.7
 ### Evaluation on features
 ##### Self validation
 1. Compute the similarity simiA between two random snippets in the same video video1.
@@ -35,26 +33,27 @@ Build new unseens test dataset for every category.
 ### Features
 #### Color 
 [Color Histogram](https://www.geeksforgeeks.org/opencv-python-program-analyze-image-using-histogram/)
+margin:15%
+self:95%
+other:80%
 
 
 #### Frame Feature
 ResNet 18
-#### Multi-frame Feature 
-R(2+1)D
+margin:12.3%
+self:96.7%
+other:84.3%
+
 #### Frame Motion Feature
-LK or Dense Optical Flow (OpenCV)
+Dense Optical Flow (OpenCV)
+margin:19.5%
+self:70.1%
+other:51%
+
 #### Audio
 MFCC (torchaudio)
-#### Object Detection
-### TODO
-- [ ] Web (Zequn)
-- [ ] Backend ComunicationPart (Zequn)
-- [ ] Comparing Strategy
-- [ ] Color (Zequn)
-- [ ] Frame Feature (Jiarong) 
-- [ ] Multi-frame Feature (Jiarong)
-- [ ] Frame Motion Feature (Jiarong)
-- [ ] Audio (Wenda)
-- [ ] Object Detection (Wenda)
-  
+margin 9%
+self: 98%
+other:89%
+
   

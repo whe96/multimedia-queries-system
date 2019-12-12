@@ -34,7 +34,7 @@ class Color:
         for name in sorted(self.features):
             feature2 = self.features[name]
             idx = 0
-            while idx + l < feature2.shape[0]:
+            while idx < feature2.shape[0]:
                 similarity = self.compare(feature, feature2[idx:idx + l])
                 res[name].append(similarity)
                 idx += span
@@ -46,7 +46,7 @@ class Color:
             l = min(features1.shape[0], features2.shape[0])
             res = []
             for t in range(l):
-                tmp = 1 - spatial.distance.cdist(features1[t], features2[t], metric='cosine')
+                tmp = (2 - spatial.distance.cdist(features1[t], features2[t], metric='cosine'))/2
                 similarity = sum([x * y / sum(self.weights) for x, y in zip([tmp[0][0], tmp[1][1], tmp[2][2]], self.weights)])
                 res.append(similarity)
             return sum(res) / len(res)
@@ -55,7 +55,7 @@ class Color:
             feature2 = np.average(features2, axis=0)
             res = []
             for c in range(feature1.shape[0]):
-                res.append(1 - spatial.distance.cosine(feature1[c], feature2[c]))
+                res.append((2 - spatial.distance.cosine(feature1[c], feature2[c]))/2)
             return sum([x * y for x, y in zip(res, self.weights)]) / sum(self.weights)
         else:
             raise ValueError("Unknown mode {}".format(mode))
@@ -121,7 +121,7 @@ class Color:
 if __name__ == '__main__':
     dir = "data/dataset"
     outdir = "feature/color"
-    color = Color(dir, outdir, 352, 288, color_space="YCrCb", bins=32)
-    color.preprocess()
+    color = Color(dir, outdir, 352, 288, color_space="RGB", bins=32)
+    # color.preprocess()
     color.load()
-    color.random_validation(100)
+    color.random_validation(1000)

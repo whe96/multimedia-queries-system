@@ -63,7 +63,7 @@ def read_video(folder, width, height,mode="RGB"):
 
 
 def merge_audio_video(video, audio, output):
-    cmd = "ffmpeg -i {} -i {} -c:a aac -vcodec libx264 -y -strict experimental {}".format(video, audio, output)
+    cmd = "ffmpeg -i {} -i {} -c:a aac -vcodec libx264 -y -strict experimental -loglevel quiet {}".format(video, audio, output)
     subprocess.call(cmd, shell=True)
 
 
