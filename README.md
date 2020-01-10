@@ -1,6 +1,5 @@
 # CS576Final
 
-# Screenshot
 ![Screenshot1](front-end/public/1.png)
 
 ![Screenshot2](front-end/public/2.png)
