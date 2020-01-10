@@ -1,4 +1,4 @@
-# CS576Final
+# Multimedia Queries System
 
 ![Screenshot1](front-end/public/1.png)
 
